@@ -1,0 +1,141 @@
+\documentclass[a4paper]{article}
+% Import some useful packages
+\usepackage[margin=0.5in]{geometry} % narrow margins
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{listings}
+\usepackage{amsmath,graphicx,varioref,verbatim,amsfonts,geometry,amssymb,dsfont,blindtext}
+%\usepackage{minted}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true}
+\definecolor{LightGray}{gray}{0.95}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{mygray}{rgb}{0.9,0.9,0.9}
+\definecolor{LightGray}{gray}{0.95}
+\lstset{frame=tb,
+language=Python,
+aboveskip=3mm,
+belowskip=3mm,
+showstringspaces=false,
+columns=flexible,
+basicstyle={\small\ttfamily},
+numbers=none,
+numberstyle=\tiny\color{gray},
+keywordstyle=\color{blue},
+commentstyle=\color{dkgreen},
+stringstyle=\color{mauve},
+backgroundcolor=\color{mygray}
+%breaklines=true,
+%breakatwhitespace=true,
+%tabsize=3
+}
+\title{Project 4 in FYS3150}
+\author{Bendik Steinsvåg Dalen}
+%\renewcommand\thesection.\alph{section}
+%\renewcommand\thesection{\Alph{section}}
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+\renewcommand\thesubsubsection{\thesubsection.\roman{subsubsection}}
+\begin{document}
+\maketitle
+
+
+
+\section{ABSTRACT}
+.
+
+\section{INTRODUCTION}
+
+
+\section{METHOD}
+\begin{align*}
+Z &= \sum_{i=1}^{M} e^{-\beta E_i} 
+%= e^{8\beta J} + 4e^{0\beta J} + 4e^{0\beta J} + 2e^{-8\beta J} + 4e^{0\beta J} + e^{8\beta J} 
+%= 2e^{8\beta J} + 2e^{-8\beta J} + 12 
+\end{align*}
+\begin{align*}
+\langle E \rangle = \frac{1}{Z} \sum_{i=1}^{M} E_i e^{-\beta E_i} 
+%&= kT^2 \left( \frac{\partial \ln Z}{\partial T} \right)_{V,N} 
+%= kT^2 \left( \frac{\partial }{\partial T} \ln \left[ 2e^{8\beta J} + 2e^{-8\beta J} + 12 \right]  \right)_{V,N} \\
+%&= kT^2 \frac{1}{2e^{8\beta J} + 2e^{-8\beta J} + 12} \left(-\frac{2\cdot 8 \cdot J e^{8\beta J}}{kT^2} + \frac{2\cdot 8 \cdot J e^{- 8\beta J}}{kT^2} \right) 
+%= \frac{8 J e^{- 8\beta J} - 8 J e^{8\beta J} }{e^{8\beta J} + e^{-8\beta J} + 6} 
+\end{align*}
+\begin{align*}
+|M| &= \frac{1}{Z} \sum_{i=1}^{m} M_i e^{-\beta E_i}
+%= \dfrac{4 e^{8\beta J} + 2 \cdot 4e^{0\beta J} + 0\cdot 4e^{0\beta J} + 0\cdot 2e^{-8\beta J} + 2\cdot 4e^{0\beta J} + 4	\cdot e^{8\beta J} }{Z}\\
+%&= \dfrac{8 e^{8\beta J} + 16}{2e^{8\beta J} + 2e^{-8\beta J} + 12}
+%= \dfrac{4 e^{8\beta J} + 8}{e^{8\beta J} + e^{-8\beta J} + 6}
+\end{align*}
+\begin{align*}
+C_V &= \frac{1}{k_BT^2} \left( \langle E^2 \rangle - \langle E \rangle ^2 \right)
+= \frac{1}{k_BT^2} \left( \frac{1}{Z} \sum_{i=1}^{m} E_i^2 e^{-\beta E_i} - \langle E \rangle ^2 \right) \\
+&= 
+\frac{1}{k_BT^2} 
+\left( \frac{ (-8J)^2 \cdot e^{8\beta J} + 0 \cdot 4e^{0\beta J} + 0\cdot 4e^{0\beta J} + (8J)^2\cdot 2e^{-8\beta J} + 0\cdot 4e^{0\beta J} +(-8J)^2 \cdot e^{8\beta J} }{Z}
+ - \left( \frac{8 J e^{- 8\beta J} - 8 J e^{8\beta J} }{e^{8\beta J} + e^{-8\beta J} + 6} \right)  ^2 \right)\\
+&= \frac{1}{k_BT^2} 
+\left( \frac{ 64J^2 \cdot 2e^{-8\beta J} - 64J^2 \cdot e^{8\beta J} }{e^{8\beta J} + e^{-8\beta J} + 6 }
+-  \frac{64J^2 e^{- 16\beta J} - 128 J^2 + 64J^2 e^{16\beta J}}{(Z/2)^2} \right)
+\end{align*}
+\begin{align*}
+\chi &= \frac{1}{k_BT} \left( \langle M^2 \rangle - \langle M \rangle ^2 \right)
+= \frac{1}{k_BT} \left( \frac{1}{Z} \sum_{i=1}^{m} M_i^2 e^{-\beta E_i} - \langle M \rangle ^2 \right)
+\end{align*}
+With $E_i$ and $M_i$ found in tabel 13.4 in the lecture notes.
+
+
+\section{RESULTS}
+
+
+
+\section{APPENDICES}
+
+
+
+
+\section{REFERENCES}
+\begin{thebibliography}{9}
+	\bibitem{lecture notes}
+	Computational Physics, Lecture Notes Fall 2015, Morten Hjort-Jensen p.424
+\end{thebibliography}
+
+
+
+
+%\begin{figure}[h!]
+%	\centering 
+%	%Scale angir størrelsen på bildet. Bildefilen må ligge i samme mappe som tex-filen. 
+%	\includegraphics[scale=0.7]{opp2_7.pdf}
+%	\caption{A plot of the entropy}
+%	%Label gjør det enkelt å referere til ulike bilder.
+%	\label{2.7}
+%\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
