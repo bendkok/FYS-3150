@@ -2,6 +2,53 @@ import PyPlot
 const plt = PyPlot
 using Statistics
 
+macro loadbar(expr1, expr2 = nothing)
+    #=
+        Creates a loading bar that updates itself inline.  Do not use in
+        loops that output text to the terminal, or the results will be
+        unsightly.
+
+        Two modes of operation:
+
+            [1]     @loadbar for idx=start:stop
+                        ...code here...
+                    end
+
+            [2]     @loadbar "Custom loading message here" for idx=start:stop
+                        ...code here...
+                    end
+    =#
+    err = "\n\n@loadbar should precede a for-loop, or a string followed by a for-loop\n"
+    cond1 = !(expr2 == nothing && isa(expr1, Expr) && expr1.head == :for)
+    cond2 = !(isa(expr1, String) && isa(expr2, Expr) && expr2.head == :for)
+    if cond1 && cond2
+        error(err)
+    elseif expr2 == nothing
+        expr2 = "Loading"
+    elseif expr2 != nothing
+        expr1, expr2 = expr2, expr1
+    end
+    _idx_ln = expr1.args[1].args[1]
+    _range_ln = (expr1.args[1].args[2])
+    quote
+        str = $expr2
+        for $(esc(_idx_ln))=$(esc(_range_ln))
+            p_new = floor((100*$(esc(_idx_ln)))/($(esc(_range_ln))[end]-$(esc(_range_ln))[1]))
+            p_last = floor((100*($(esc(_idx_ln))-1))/($(esc(_range_ln))[end]-$(esc(_range_ln))[1]))
+            if $(esc(_idx_ln)) == $(esc(_range_ln))[1]
+                print("$str [0%]\r")
+            elseif $(esc(_idx_ln)) == $(esc(_range_ln))[end]
+                println("$str [100%]")
+            elseif p_new > p_last
+                p_new = convert(Int64, p_new)
+                print("$str [$p_new%]\r")
+            end
+            p_last = p_new
+            $(esc(expr1.args[2]))
+        end
+    end
+end
+
 function energy(J, s)
     """
     A function that finds the energy for one cycle of the Monte Carlo
@@ -58,7 +105,7 @@ function magnetization(s)
     A function that finds the magnetization for a matrix of spins s.
     Outputs M, the sum of the spins.
     """
-    M = sum(s)
+    M = abs(sum(s))
     return M
 end
 
@@ -123,22 +170,23 @@ function Ising_model(J,s,n,T,k)
     push!(M, m1)"
     E[1] = e1
     M[1] = m1
+    acc_con = zeros(Int64(n))
 
-    rand_koor = zeros(L,2)
+    rand_koor = zeros(L^2,2)
+    
     for i = 1:n 
         #finn L^2 random koordinater
-        for l = 1:L
+        for l = 1:L^2
             rand_koor[l,:] = rand(1:L, 2)
         end
         #gå gjennom alle koordinater
-        for j = 1:length(L) #rand_koor[:,1]
+        for j = 1:L^2 #rand_koor[:,1]
             l = Int64(rand_koor[j,1])
             k = Int64(rand_koor[j,2])
-
             #flip spin
             s[l,k]*=-1
             #find dE
-            dE = delta_E(J, s, l, k)
+            dE = -1*delta_E(J, s, l, k)
             #test dE <= 0
             if dE > 0 #false: keep fliped
                 #få random tall r e[0,1]
@@ -147,18 +195,19 @@ function Ising_model(J,s,n,T,k)
                 #test r <= w
                 if r[1] > w #false: keep fliped
                     s[l,k]*=-1
+                else
+                    acc_con[Int64(i)]+=1 #eller motsatt
                 end
             end
         end
-        #gjør resten:
-
         #finds the energy and magnetization for current spins 
-        e = energy(J,s) 
+        e = energy(J,s)
         m = magnetization(s)
         push!(E, Int64(e))
         push!(M, Int64(m))
     end
-    return E,M,s
+    #return E[2:length(E)],M[2:length(M)],s
+    return E,M,s,acc_con
 end
 
 function Ising_model_test(J,s,n_max,T,k,r_o)
@@ -167,30 +216,47 @@ function Ising_model_test(J,s,n_max,T,k,r_o)
     to reach equlibrium by plotting the mean E and M against number of
     cycles.
     """
-    E,M,s0 = Ising_model(J,s,n_max,T,k) #finds E and M
+    E,M,ss,acc_con = Ising_model(J,s,n_max,T,k) #finds E and M
     ye = zeros(length(E))
     ym = zeros(length(E))
+    Etot = 0
+    Mtot = 0
     for i = 1:length(E) #finds the mean E and M for the current value
-        ye[i] = mean_val(E[1:i]) #and all the one preciding
-        ym[i] = abs(mean_val(M[1:i]))
+        Etot += E[i]
+        Mtot += M[i]
+        ye[i] = Etot/i #and all the one preciding
+        ym[i] = Mtot/i
+        #ye[i] = mean_val(E[1:i]) #and all the one preciding
+        #ym[i] = abs(mean_val(M[1:i]))
     end
     x = 1:length(E)
+    x = x/1e5
     #plots the results
     plt.plot(x,ye)
     plt.grid()
-    plt.xlabel("Cycles")
+    plt.xlabel("1e5 Cycles")
     plt.ylabel("Mean energy")
-    plt.savefig("C:\\Users\\Bendik\\Documents\\FYS3150\\Prosjekt 4\\opp_c_e_"*string(T)*"K_"*string(n_max)*"_"*r_o*".pdf")
+    #plt.legend([T],loc="best")
+    #plt.savefig("C:\\Users\\Bendik\\Documents\\FYS3150\\Prosjekt 4\\opp_c_e_"*string(Int64(T*10))*"K_"*string(Int64(n_max))*"_"*r_o*".pdf")
     plt.show()
 
     plt.plot(x,ym)
     plt.grid()
-    plt.xlabel("Cycles")
+    plt.xlabel("1e5 Cycles")
     plt.ylabel("Mean magnetization")
-    plt.savefig("C:\\Users\\Bendik\\Documents\\FYS3150\\Prosjekt 4\\opp_c_m_"*string(T)*"K_"*string(n_max)*"_"*r_o*".pdf")
+    #plt.legend([string(T)*"K"],loc="best")
+    #plt.savefig("C:\\Users\\Bendik\\Documents\\FYS3150\\Prosjekt 4\\opp_c_m_"*string(Int64(T*10))*"K_"*string(Int64(n_max))*"_"*r_o*".pdf")
     plt.show()
     
-    return E,M,s,ye,ym
+    #plt.plot(x[2:length(x)],acc_con)
+    #plt.grid()
+    #plt.xlabel("1e5 Cycles")
+    #plt.ylabel("Accepted configurations")
+    #plt.legend([string(T)*"K"],loc="best")
+    #plt.savefig("C:\\Users\\Bendik\\Documents\\FYS3150\\Prosjekt 4\\opp_c_a_"*string(Int64(T*10))*"K_"*string(Int64(n_max))*"_"*r_o*".pdf")
+    #plt.show()
+    
+    #return E,M,s,ye,ym
 end
 
 function analytical_values(T, k, Ei, Mi, deg)
